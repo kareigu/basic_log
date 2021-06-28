@@ -1,8 +1,16 @@
 [package]
 name = "basic_log"
+description = "A basic logging crate for Rust."
 version = "0.1.0"
 authors = ["mxr <eetu.kivelae@gmail.com>"]
 edition = "2018"
+license = "MPL 2.0"
+license-file = "LICENSE"
+repository = "https://github.com/mxrr/basic_log"
+keywords = ["log"]
+readme = "README.md"
+homepage = "https://github.com/mxrr/basic_log"
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
