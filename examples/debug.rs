@@ -1,9 +1,12 @@
-use basic_log::BasicLog;
-use log::{trace, debug};
+use basic_log::{BasicLog, trace, debug};
 
 fn main() {
-  BasicLog::new()
-    .enable_debug()
+  BasicLog::new_with_settings(
+    |s| 
+      s
+      .enable_debug()
+      .enable_trace()
+    )
     .init()
     .expect("Failed to initialise BasicLog");
 

@@ -1,26 +1,79 @@
 use log::{LevelFilter, Record, Log, Metadata, Level, SetLoggerError};
 use colored::*;
 use chrono::Local;
+pub use log::{info, warn, error, debug, trace};
 
 pub struct BasicLog {
-  default_level: LevelFilter,
+  output_level: LevelFilter,
 }
 
-impl BasicLog {
-  #[must_use = "Must initialise logger"]
+pub struct LoggerSettings {
+  enable_debug: bool,
+  enable_trace: bool,
+}
+
+impl LoggerSettings {
   pub fn new() -> Self {
     Self {
-      default_level: LevelFilter::Info,
+      enable_debug: false,
+      enable_trace: false,
     }
   }
 
-  pub fn enable_debug(mut self) -> BasicLog {
-    self.default_level = LevelFilter::Debug;
+  pub fn enable_debug(mut self) -> Self {
+    self.enable_debug = true;
     self
   }
 
+  pub fn enable_trace(mut self) -> Self {
+    self.enable_trace = true;
+    self
+  }
+}
+
+impl Default for LoggerSettings {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
+impl BasicLog {
+  fn set_settings(logger: &mut BasicLog, s: LoggerSettings) {
+    logger.output_level = {
+      if s.enable_trace {
+        LevelFilter::Trace
+      }
+      else if s.enable_debug {
+        LevelFilter::Debug
+      } else {
+        logger.output_level
+      }
+    };
+  }
+
+  #[must_use = "Must initialise logger: .init()"]
+  pub fn new() -> Self {
+    Self {
+      output_level: LevelFilter::Info,
+    }
+  }
+
+  #[must_use = "Must initialise logger: .init()"]
+  pub fn new_with_settings<F>(s: F) -> Self
+    where F: FnOnce(LoggerSettings) -> LoggerSettings {
+      let mut logger = Self::default();
+      Self::set_settings(&mut logger, s(LoggerSettings::default()));
+      logger
+  }
+
+  pub fn new_with_struct(s: LoggerSettings) -> Self {
+    let mut logger = Self::default();
+    Self::set_settings(&mut logger, s);
+    logger
+  }
+  
   pub fn init(self) -> Result<(), SetLoggerError> {
-    log::set_max_level(self.default_level);
+    log::set_max_level(self.output_level);
     log::set_boxed_logger(Box::new(self))?;
     Ok(())
   }
@@ -28,13 +81,14 @@ impl BasicLog {
 
 impl Default for BasicLog {
   fn default() -> Self {
-    BasicLog::new()
+    Self::new()
   }
 }
 
+
 impl Log for BasicLog {
   fn enabled(&self, metadata: &Metadata) -> bool {
-    metadata.level().to_level_filter() <= self.default_level
+    metadata.level().to_level_filter() <= self.output_level
   }
 
   fn log(&self, rec: &Record) {
@@ -64,8 +118,25 @@ impl Log for BasicLog {
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
+  use crate::BasicLog;
+  use log::SetLoggerError;
+  #[test]
+  fn it_works() {
+    assert_eq!(2 + 2, 4);
+  }
+
+  #[test]
+  fn create_logger() -> Result<(), SetLoggerError> {
+    BasicLog::new().init()?;
+    Ok(())
+  }
+
+  #[test]
+  fn set_settings() {
+    use crate::LoggerSettings;
+    let mut logger = BasicLog::new();
+    let s = LoggerSettings::default().enable_debug();
+    BasicLog::set_settings(&mut logger, s);
+    assert_eq!(logger.output_level, log::LevelFilter::Debug);
+  }
 }
