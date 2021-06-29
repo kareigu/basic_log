@@ -118,8 +118,25 @@ impl Log for BasicLog {
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
+  use crate::BasicLog;
+  use log::SetLoggerError;
+  #[test]
+  fn it_works() {
+    assert_eq!(2 + 2, 4);
+  }
+
+  #[test]
+  fn create_logger() -> Result<(), SetLoggerError> {
+    BasicLog::new().init()?;
+    Ok(())
+  }
+
+  #[test]
+  fn set_settings() {
+    use crate::LoggerSettings;
+    let mut logger = BasicLog::new();
+    let s = LoggerSettings::default().enable_debug();
+    BasicLog::set_settings(&mut logger, s);
+    assert_eq!(logger.output_level, log::LevelFilter::Debug);
+  }
 }
