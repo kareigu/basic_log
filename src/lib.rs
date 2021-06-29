@@ -7,7 +7,46 @@ pub struct BasicLog {
   output_level: LevelFilter,
 }
 
+pub struct LoggerSettings {
+  enable_debug: bool,
+  enable_trace: bool,
+}
+
+impl LoggerSettings {
+  pub fn enable_debug(mut self) -> Self {
+    self.enable_debug = true;
+    self
+  }
+
+  pub fn enable_trace(mut self) -> Self {
+    self.enable_trace = true;
+    self
+  }
+}
+
+impl Default for LoggerSettings {
+  fn default() -> Self {
+    Self {
+      enable_debug: false,
+      enable_trace: false,
+    }
+  }
+}
+
 impl BasicLog {
+  fn set_settings(logger: &mut BasicLog, s: LoggerSettings) {
+    logger.output_level = {
+      if s.enable_trace {
+        LevelFilter::Trace
+      }
+      else if s.enable_debug {
+        LevelFilter::Debug
+      } else {
+        logger.output_level
+      }
+    };
+  }
+
   #[must_use = "Must initialise logger: .init()"]
   pub fn new() -> Self {
     Self {
@@ -15,18 +54,13 @@ impl BasicLog {
     }
   }
 
-  #[must_use = "Must initialise logger: .init()"]
-  pub fn enable_debug(mut self) -> BasicLog {
-    self.output_level = LevelFilter::Debug;
-    self
+  pub fn new_with_settings<F>(s: F) -> Self
+    where F: FnOnce(LoggerSettings) -> LoggerSettings {
+      let mut logger = Self::default();
+      Self::set_settings(&mut logger, s(LoggerSettings::default()));
+      logger
   }
-
-  #[must_use = "Must initialise logger: .init()"]
-  pub fn enable_trace(mut self) -> BasicLog {
-    self.output_level = LevelFilter::Trace;
-    self
-  }
-
+  
   pub fn init(self) -> Result<(), SetLoggerError> {
     log::set_max_level(self.output_level);
     log::set_boxed_logger(Box::new(self))?;
@@ -36,9 +70,10 @@ impl BasicLog {
 
 impl Default for BasicLog {
   fn default() -> Self {
-    BasicLog::new()
+    Self::new()
   }
 }
+
 
 impl Log for BasicLog {
   fn enabled(&self, metadata: &Metadata) -> bool {
