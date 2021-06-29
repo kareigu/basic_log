@@ -53,7 +53,8 @@ impl BasicLog {
       output_level: LevelFilter::Info,
     }
   }
-
+  
+  #[must_use = "Must initialise logger: .init()"]
   pub fn new_with_settings<F>(s: F) -> Self
     where F: FnOnce(LoggerSettings) -> LoggerSettings {
       let mut logger = Self::default();
