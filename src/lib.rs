@@ -3,24 +3,31 @@ use colored::*;
 use chrono::Local;
 
 pub struct BasicLog {
-  default_level: LevelFilter,
+  output_level: LevelFilter,
 }
 
 impl BasicLog {
-  #[must_use = "Must initialise logger"]
+  #[must_use = "Must initialise logger: .init()"]
   pub fn new() -> Self {
     Self {
-      default_level: LevelFilter::Info,
+      output_level: LevelFilter::Info,
     }
   }
 
+  #[must_use = "Must initialise logger: .init()"]
   pub fn enable_debug(mut self) -> BasicLog {
-    self.default_level = LevelFilter::Debug;
+    self.output_level = LevelFilter::Debug;
+    self
+  }
+
+  #[must_use = "Must initialise logger: .init()"]
+  pub fn enable_trace(mut self) -> BasicLog {
+    self.output_level = LevelFilter::Trace;
     self
   }
 
   pub fn init(self) -> Result<(), SetLoggerError> {
-    log::set_max_level(self.default_level);
+    log::set_max_level(self.output_level);
     log::set_boxed_logger(Box::new(self))?;
     Ok(())
   }
@@ -34,7 +41,7 @@ impl Default for BasicLog {
 
 impl Log for BasicLog {
   fn enabled(&self, metadata: &Metadata) -> bool {
-    metadata.level().to_level_filter() <= self.default_level
+    metadata.level().to_level_filter() <= self.output_level
   }
 
   fn log(&self, rec: &Record) {
