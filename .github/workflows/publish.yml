@@ -8,13 +8,13 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  publish:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
     - name: Login to cargo
-      run: cargo login ${ secrets.CARGO_LOGIN }
+      run: cargo login ${{ secrets.CARGO_LOGIN }}
     - name: Publish
       run: cargo publish
