@@ -1,6 +1,7 @@
 use log::{LevelFilter, Record, Log, Metadata, Level, SetLoggerError};
 use colored::*;
 use chrono::Local;
+pub use log::{info, warn, error, debug, trace};
 
 pub struct BasicLog {
   output_level: LevelFilter,

@@ -1,5 +1,4 @@
-use basic_log::BasicLog;
-use log::{info, warn, error};
+use basic_log::{BasicLog, info, warn, error};
 
 fn main() {
   BasicLog::new().init().expect("Failed to initialise BasicLog");

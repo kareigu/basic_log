@@ -1,5 +1,4 @@
-use basic_log::BasicLog;
-use log::{trace, debug};
+use basic_log::{BasicLog, trace, debug};
 
 fn main() {
   BasicLog::new()
