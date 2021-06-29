@@ -3,7 +3,9 @@ name: Rust
 on:
   pull_request:
     branches: [ prod ]
-
+  
+  workflow_dispatch:
+  
 env:
   CARGO_TERM_COLOR: always
 
