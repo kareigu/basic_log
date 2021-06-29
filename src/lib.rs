@@ -13,6 +13,13 @@ pub struct LoggerSettings {
 }
 
 impl LoggerSettings {
+  pub fn new() -> Self {
+    Self {
+      enable_debug: false,
+      enable_trace: false,
+    }
+  }
+
   pub fn enable_debug(mut self) -> Self {
     self.enable_debug = true;
     self
@@ -26,10 +33,7 @@ impl LoggerSettings {
 
 impl Default for LoggerSettings {
   fn default() -> Self {
-    Self {
-      enable_debug: false,
-      enable_trace: false,
-    }
+    Self::new()
   }
 }
 
@@ -53,13 +57,19 @@ impl BasicLog {
       output_level: LevelFilter::Info,
     }
   }
-  
+
   #[must_use = "Must initialise logger: .init()"]
   pub fn new_with_settings<F>(s: F) -> Self
     where F: FnOnce(LoggerSettings) -> LoggerSettings {
       let mut logger = Self::default();
       Self::set_settings(&mut logger, s(LoggerSettings::default()));
       logger
+  }
+
+  pub fn new_with_struct(s: LoggerSettings) -> Self {
+    let mut logger = Self::default();
+    Self::set_settings(&mut logger, s);
+    logger
   }
   
   pub fn init(self) -> Result<(), SetLoggerError> {
